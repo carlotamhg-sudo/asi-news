@@ -49,7 +49,7 @@ def fetch_asi_news(topic_query):
 
 # --- 3. PAGE CONTENT ---
 def home():
-    st.title("🗞️ ASI News")
+    st.title("🦎 ASI News")
     st.caption("2021 – 2026 Archive | Strictly Verified Sources")
     
     # Search and Filter Bar
@@ -103,6 +103,7 @@ else:
 st.markdown("---")
 st.markdown("<center><i>AI Disclaimer: Summaries and perspectives are AI-generated for analytical context.</i></center>", unsafe_allow_html=True)
 st.markdown("<center>© 2026 ASI News — All Sides Included</center>", unsafe_allow_html=True)
+
 
 
 
