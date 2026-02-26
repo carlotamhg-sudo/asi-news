@@ -3,6 +3,32 @@ import streamlit as st
 import requests
 import sqlite3
 from datetime import datetime
+from openai import OpenAI
+
+# Initialize the client (Replace 'YOUR_OPENAI_API_KEY' with your actual key)
+client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
+
+def generate_asi_analysis(headline, source):
+    prompt = f"""
+    Act as a senior neutral journalist for ASI News. 
+    Analyze the following news event: "{headline}" from {source}.
+    
+    Provide the response in the following strict format:
+    1. SUMMARY: A 3-paragraph objective summary of the event.
+    2. PERSPECTIVE 1 (Local Residents): 200 words explaining their viewpoint and a one-sentence 'Analytical Context' assumption.
+    3. PERSPECTIVE 2 (Global Markets): 200 words explaining their viewpoint and a one-sentence 'Analytical Context' assumption.
+    4. PERSPECTIVE 3 (Policy Makers): 200 words explaining their viewpoint and a one-sentence 'Analytical Context' assumption.
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o", # Or "gpt-3.5-turbo" for lower cost
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error generating analysis: {e}"
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="ASI News", page_icon="🦎", layout="wide")
@@ -115,29 +141,16 @@ def show_analysis(article):
     st.divider()
     st.header(article['title'])
     
-    # 1. AI Summary
-    st.subheader("Event Summary")
-    st.write("Generating 3-paragraph summary via AI...") # Here you'd call Gemini/GPT-4
+    with st.spinner("AI Agent is analyzing multiple perspectives..."):
+        # CALL THE AI FUNCTION HERE
+        analysis_text = generate_asi_analysis(article['title'], article['source'])
     
-    # 2. Deep Dive Perspectives
-    p_cols = st.columns(3)
-    perspectives = ["Local Residents", "Global Markets", "Environmental Groups"]
+    # Display the result
+    st.markdown("### Deep Dive Analysis")
+    st.write(analysis_text)
     
-    for i, p in enumerate(p_cols):
-        with p:
-            st.markdown(f"**Perspective: {perspectives[i]}**")
-            st.markdown('<div class="analytical-context">This viewpoint assumes that economic growth is the primary driver of social stability.</div>', unsafe_allow_html=True)
-            st.write("Lorum ipsum... (200+ words of AI generated analysis would appear here)")
-
-    # 3. Community Comments
-    st.write("---")
-    st.subheader("Community Perspectives")
-    with st.form("comment_form"):
-        u_name = st.text_input("Name")
-        u_comm = st.text_area("Share your perspective")
-        if st.form_submit_button("Post"):
-            # Insert into SQLite
-            st.success("Perspective saved to the community database!")
+    # UI Tip: You can use regex or .split() to parse the 'analysis_text' 
+    # if you want to put them into the specific yellow 'Analytical Context' boxes.
 
 def render_about():
     st.markdown("<h2 style='text-align: center;'>Our Mission</h2>", unsafe_allow_html=True)
@@ -179,4 +192,5 @@ sources_links = {
 for i, (name, link) in enumerate(sources_links.items()):
     with s_cols[i % 4]:
         st.link_button(f"✅ {name}", link)
+
 
