@@ -97,12 +97,13 @@ if page == "Home":
 else:
     st.title("About Us")
     st.markdown("### Mission\nTo foster empathy and global understanding by providing objective, multi-perspective analysis of the world's most important news — because all sides must be included.")
-    st.markdown("### The Problem\nWhy We Built ASI News\nIn today's polarized world, news is often presented through a single lens. This creates echo chambers where people only hear views that match their own. We believe that true understanding comes from exploring multiple perspectives. Like a chameleon that adapts and sees the world from many angles, ASI News — All Sides Included — helps you understand why people agree, disagree, or remain uncertain about important events. Our AI-powered analysis presents these viewpoints in a simple, empathetic way — making complex global events accessible to students, professionals, and curious minds of all ages.")
+    st.markdown("### The Problem\nWHY WE BUILT ASI NEWS\n In today's polarized world, news is often presented through a single lens. This creates echo chambers where people only hear views that match their own. We believe that true understanding comes from exploring multiple perspectives. Like a chameleon that adapts and sees the world from many angles, ASI News — All Sides Included — helps you understand why people agree, disagree, or remain uncertain about important events. Our AI-powered analysis presents these viewpoints in a simple, empathetic way — making complex global events accessible to students, professionals, and curious minds of all ages.")
     st.markdown("### Values\n- Objectivity\n- Empathy\n- Trust\n- Accessibility")
 
 st.markdown("---")
 st.markdown("<center><i>AI Disclaimer: Summaries and perspectives are AI-generated for analytical context.</i></center>", unsafe_allow_html=True)
 st.markdown("<center>© 2026 ASI News — All Sides Included</center>", unsafe_allow_html=True)
+
 
 
 
