@@ -1,4 +1,4 @@
-pip install streamlit requests pandas pysqlite3
+
 import streamlit as st
 import requests
 import sqlite3
@@ -192,5 +192,6 @@ sources_links = {
 for i, (name, link) in enumerate(sources_links.items()):
     with s_cols[i % 4]:
         st.link_button(f"✅ {name}", link)
+
 
 
