@@ -39,7 +39,7 @@ def fetch_asi_news(category, search_query=None):
 page = st.sidebar.radio("Navigation", ["Home", "About Us"])
 
 if page == "Home":
-    st.title("🗞️ ASI News")
+    st.title("🦎 ASI News")
     query = st.text_input("Search archives...", placeholder="e.g. AI Policy")
     
     tabs = st.tabs(["Middle-East", "AI", "USA", "Ukraine", "EU", "Live News"])
@@ -64,6 +64,7 @@ elif page == "About Us":
 
 st.sidebar.markdown("---")
 st.sidebar.caption("© 2026 ASI News. Data strictly sourced from AP, Reuters, BBC, and partners.")
+
 
 
 
