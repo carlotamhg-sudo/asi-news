@@ -21,7 +21,7 @@ API_KEY = st.secrets["news_api_key"]
 def fetch_asi_news(category, search_query=None):
     # Free Tier Limitation: Usually limited to the last 30 days. 
     # For 2021+ data, a 'Business' API plan is required.
-    base_url = "https://newsapi.org/v2/everything"
+    base_url = "https://gnews.io/api/v4/{endpoint}?{parameters}"
     sources = "reuters,associated-press,bbc-news,al-jazeera-english,the-guardian-uk,the-economist,financial-times,deutsche-welle"
     
     params = {
@@ -64,6 +64,7 @@ elif page == "About Us":
 
 st.sidebar.markdown("---")
 st.sidebar.caption("© 2026 ASI News. Data strictly sourced from AP, Reuters, BBC, and partners.")
+
 
 
 
