@@ -3,7 +3,7 @@ from google import genai
 import feedparser
 
 # --- CONFIG ---
-st.set_page_config(page_title="ASI News", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="ASI News", page_icon="🦎", layout="wide")
 
 # Use the NEW 2026 stable model name
 MODEL_NAME = "gemini-2.5-flash" 
@@ -67,3 +67,4 @@ for name, url in SOURCES.items():
                 st.write("AI is currently busy. Click to retry.")
         else:
             st.write("No recent news found for this source.")
+
