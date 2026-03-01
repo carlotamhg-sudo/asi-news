@@ -88,7 +88,7 @@ SOURCES = {
 }
 
 # --- NAVIGATION ---
-st.sidebar.image("🦎", width=60)
+st.sidebar.image("https://img.icons8.com/color/96/chameleon.png", width=60)
 st.sidebar.title("ASI News")
 page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"])
 st.sidebar.markdown("---")
@@ -183,4 +183,5 @@ elif page == "🦎 About Us":
         * 🧠 Google Gemini 2.5 AI
         * 📡 Global RSS Feeds
         """)
+
 
