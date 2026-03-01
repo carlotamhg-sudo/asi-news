@@ -1,108 +1,89 @@
-import streamlit as st
-from gnews import GNews
-from datetime import datetime
+import feedparser
+import google.generativeai as genai
+import time
 
-# --- 1. BRANDING & UI ---
-st.set_page_config(page_title="ASI News — All Sides Included", layout="wide")
+print("🚀 A iniciar a Teia de RSS do All Sides Included (Estilo Minimalista Zen)...\n")
 
-# Chameleon Aesthetic CSS
-st.markdown("""
+# 1. A TUA CHAVE SECRETA DO GEMINI
+MINHA_CHAVE = ''
+genai.configure(api_key=MINHA_CHAVE)
+modelo_ia = genai.GenerativeModel('gemini-2.5-flash')
+
+# 2. A TUA TEIA DE FONTES (Podes adicionar os links que quiseres!)
+lista_de_feeds = [
+    "http://feeds.bbci.co.uk/news/world/rss.xml",       # BBC World
+    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", # NY Times
+    "https://www.theguardian.com/world/rss"             # The Guardian
+]
+
+# 3. O PROMPT MÁGICO PARA HTML
+instrucao_base = """Act as an impartial news analyst. Read the headline and excerpt. 
+Respond ONLY with this exact HTML structure, filling in the content in English:
+<div class="box fact"><strong>The Core Fact:</strong> [2-sentence factual summary]</div>
+<div class="box advocate"><strong>The Advocate:</strong> [Persuasive paragraph defending it]</div>
+<div class="box skeptic"><strong>The Skeptic:</strong> [Critical paragraph against it]</div>
+<div class="box observer"><strong>The Observer:</strong> [Neutral paragraph explaining context]</div>
+"""
+
+# 4. O CABEÇALHO DO SITE (O Design Minimalista Zen)
+html_completo = """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>All Sides Included News</title>
     <style>
-    .stApp { background-color: #F9F8F3; }
-    div.stButton > button:first-child { 
-        background-color: #005A32; 
-        color: white; 
-        border-radius: 5px; 
-    }
-    .news-card { 
-        background-color: white; 
-        padding: 20px; 
-        border-radius: 12px; 
-        border-left: 6px solid #005A32; 
-        margin-bottom: 25px; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
-    .source-tag { color: #005A32; font-weight: bold; font-size: 0.9em; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #FAFAFA; color: #333; max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        h1 { text-align: center; font-size: 36px; border-bottom: 2px solid #ddd; padding-bottom: 20px; letter-spacing: -1px; }
+        .fonte { font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .noticia { background: white; padding: 30px; margin-bottom: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .titulo-noticia { font-size: 24px; margin-top: 0; color: #111; }
+        .box { padding: 15px; margin-bottom: 15px; border-radius: 4px; background-color: #fcfcfc; line-height: 1.6; }
+        .fact { border-left: 4px solid #555; }
+        .advocate { border-left: 4px solid #2ecc71; background-color: #f4fdf8; }
+        .skeptic { border-left: 4px solid #e74c3c; background-color: #fdf4f3; }
+        .observer { border-left: 4px solid #3498db; background-color: #f4f9fd; }
     </style>
-""", unsafe_allow_html=True)
+</head>
+<body>
+    <h1>All Sides Included News</h1>
+    <p style="text-align: center; color: #777;">Different perspectives, one place. Updated daily.</p>
+"""
 
-# --- 2. GNEWS ENGINE ---
-def fetch_asi_news(topic_query):
-    # Initialize GNews
-    # 'period' can be used, but since 2021 we use start_date
-    google_news = GNews(language='en', country='US', max_results=15)
-    google_news.start_date = (2021, 1, 1) # Start archive from 2021
+# 5. O MOTOR QUE VAI VARRER A TEIA DE RSS
+for url_feed in lista_de_feeds:
+    print(f"\n📡 A ligar à fonte: {url_feed}")
+    noticias = feedparser.parse(url_feed)
+    nome_jornal = noticias.feed.title if 'title' in noticias.feed else "News Source"
     
-    # Strictly approved sources
-    allowed = ["Reuters", "AP", "BBC", "Al Jazeera", "The Guardian", "The Economist", "FT", "DW"]
-    
-    # Fetch results
-    results = google_news.get_news(topic_query)
-    
-    # Filter logic to ensure only your specific sources are shown
-    filtered = []
-    for item in results:
-        publisher = item.get('publisher', {}).get('title', '')
-        if any(source.lower() in publisher.lower() for source in allowed):
-            filtered.append(item)
-    return filtered
+    # Aqui dizemos para puxar apenas as 2 primeiras notícias de cada jornal (para testar).
+    # Mais tarde, muda o [:2] para [:35] para teres mais de 100 notícias no total!
+    for artigo in noticias.entries[:2]:
+        titulo = artigo.title
+        resumo = artigo.description if 'description' in artigo else "No description available."
+        
+        print(f"🔄 A analisar: {titulo}...")
+        
+        pergunta = f"{instrucao_base}\nHeadline: {titulo}\nExcerpt: {resumo}"
+        resposta = modelo_ia.generate_content(pergunta)
+        
+        # Montar a caixa da notícia no site
+        html_completo += f'<div class="noticia">\n<span class="fonte">{nome_jornal}</span>\n<h2 class="titulo-noticia">{titulo}</h2>\n'
+        html_completo += resposta.text
+        html_completo += '\n</div>\n'
+        
+        # Pequena pausa para a IA não bloquear o teu plano gratuito
+        time.sleep(3) 
 
-# --- 3. PAGE CONTENT ---
-def home():
-    st.title("🦎 ASI News")
-    st.caption("2021 – 2026 Archive | Strictly Verified Sources")
-    
-    # Search and Filter Bar
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        search = st.text_input("Global Search", placeholder="Enter keywords...")
-    with col2:
-        st.write(" ") # Spacer
-        if st.button("Refresh Feed"):
-            st.rerun()
+# Fechar o código da página
+html_completo += "\n</body>\n</html>"
 
-    # Category Tabs
-    tabs = st.tabs(["Middle-East", "AI", "USA", "Ukraine", "EU", "Live News"])
-    categories = ["Middle East", "Artificial Intelligence", "USA Politics", "Ukraine War", "European Union", "Breaking News"]
+# 6. GUARDAR O SITE
+with open("index.html", "w", encoding='utf-8') as site:
+    site.write(html_completo)
 
-    for i, tab in enumerate(tabs):
-        with tab:
-            query = f"{categories[i]} {search}".strip()
-            articles = fetch_asi_news(query)
-            
-            if not articles:
-                st.info("No matching articles from the 8 approved sources found for this category.")
-            
-            for art in articles:
-                with st.container():
-                    st.markdown(f"""
-                    <div class="news-card">
-                        <span class="source-tag">{art['publisher']['title']}</span>
-                        <h3>{art['title']}</h3>
-                        <p><strong>Published:</strong> {art['published date']}</p>
-                        <p>{art['description']}</p>
-                        <a href="{art['url']}" target="_blank">Read Full Perspective →</a>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    with st.expander("Analytical Context & Perspectives"):
-                        st.write("**Drivers & Motivations:** Stakeholders are balancing regional stability with economic interests.")
-                        st.info("**AI Context:** This event aligns with the 2021-2024 trend of decentralized reporting.")
+print("\n✅ SUCESSO! A Teia funcionou. Abre o teu ficheiro 'index.html' para veres as notícias mundiais!")
 
-# --- 4. NAVIGATION & FOOTER ---
-page = st.sidebar.radio("Navigation", ["Home", "About Us"])
-
-if page == "Home":
-    home()
-else:
-    st.title("About Us")
-    st.markdown("### Mission\nTo foster empathy and global understanding by providing objective, multi-perspective analysis of the world's most important news — because all sides must be included.")
-    st.markdown("### The Problem\nWHY WE BUILT ASI NEWS \n In today's polarized world, news is often presented through a single lens. This creates echo chambers where people only hear views that match their own. We believe that true understanding comes from exploring multiple perspectives. Like a chameleon that adapts and sees the world from many angles, ASI News — All Sides Included — helps you understand why people agree, disagree, or remain uncertain about important events. Our AI-powered analysis presents these viewpoints in a simple, empathetic way — making complex global events accessible to students, professionals, and curious minds of all ages.")
-    st.markdown("### Values\n- Objectivity\n- Empathy\n- Trust\n- Accessibility")
-
-st.markdown("---")
-st.markdown("<center><i>AI Disclaimer: Summaries and perspectives are AI-generated for analytical context.</i></center>", unsafe_allow_html=True)
-st.markdown("<center>© 2026 ASI News — All Sides Included</center>", unsafe_allow_html=True)
 
 
 
