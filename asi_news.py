@@ -48,7 +48,6 @@ st.caption("Bridging Global Perspectives for Business Leaders")
 
 RSS_FEEDS = {
     "Reuters": "https://www.reutersagency.com/feed/?best-sectors=world-news",
-    "AP News": "https://apnews.com/hub/international-news.rss",
     "BBC News": "http://feeds.bbci.co.uk/news/world/rss.xml",
     "Al Jazeera": "https://www.aljazeera.com/xml/rss/all.xml",
     "The Guardian": "https://www.theguardian.com/world/rss",
@@ -108,4 +107,5 @@ if st.button("Analyze Recent News"):
                 st.error(f"Gemini AI Error: {e}")
         else:
             st.warning("No news found in the last 3 days for this source.")
+
 
