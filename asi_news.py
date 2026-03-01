@@ -88,11 +88,11 @@ SOURCES = {
 }
 
 # --- NAVIGATION ---
-st.sidebar.image("https://img.icons8.com/fluency/96/10b981/news.png", width=60)
+st.sidebar.image("🦎", width=60)
 st.sidebar.title("ASI News")
 page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"])
 st.sidebar.markdown("---")
-st.sidebar.caption("Project for Global Business Environment")
+st.sidebar.caption("Project for Global Business Environment made by Maria Carlota Gonçalves. Any problem please contact 62408@novasbe.pt")
 
 # ==========================================
 # PAGE 1: LIVE NEWS FEED
@@ -136,7 +136,7 @@ if page == "📰 Live News Feed":
                         
                         1. Write a clear, engaging 2-paragraph summary. Use professional but highly accessible language (no heavy jargon).
                         2. Identify 3 distinct international or societal Points of View (e.g., EU Regulators, Developing Nations, Global Markets).
-                        3. For each Point of View, provide exactly 1 sentence of Historical Context explaining the root of their stance.
+                        3. For each Point of View, provide a Historical Context explaining the root of their stance.
                         
                         Format with bold headers and bullet points.
                         """
@@ -183,3 +183,4 @@ elif page == "🦎 About Us":
         * 🧠 Google Gemini 2.5 AI
         * 📡 Global RSS Feeds
         """)
+
