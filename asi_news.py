@@ -85,9 +85,46 @@ st.sidebar.markdown("---")
 if page == "📰 Live News Feed":
     
     if st.session_state.view == "feed":
-        st.markdown("<h1 style='color: #065f46; font-family: Georgia, serif;'>ASI News Dashboard</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>Select an article below to analyze global perspectives.</p>", unsafe_allow_html=True)
+        
+        # --- NEW HEADER WITH REFRESH BUTTON ---
+        head_col, btn_col = st.columns([4, 1])
+        with head_col:
+            st.markdown("<h1 style='color: #065f46; font-family: Georgia, serif; margin-bottom: 0;'>ASI News Dashboard</h1>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #64748b; font-size: 1.1rem; margin-top: 5px;'>Select an article below to analyze global perspectives.</p>", unsafe_allow_html=True)
+        with btn_col:
+            st.markdown("<br>", unsafe_allow_html=True) # Pushes the button down slightly to align perfectly
+            if st.button("🔄 Refresh Live Feed", use_container_width=True):
+                st.rerun()
+                
         st.markdown("---")
+        
+        # --- LOAD FEED (Top 2 Stories Per Source) ---
+        for source_name, url in SOURCES.items():
+            feed = feedparser.parse(url)
+            
+            # Check if feed has at least 2 stories
+            if len(feed.entries) >= 2:
+                for i in range(2):
+                    story = feed.entries[i]
+                    
+                    st.markdown(f"""
+                        <div class="news-feed-card">
+                            <span class="source-badge-grey">{source_name.upper()}</span>
+                            <h3 style="margin-top: 15px; color: #1e293b; font-family: Georgia, serif;">{story.title}</h3>
+                            <p style="color: #64748b; font-family: Georgia, serif; font-style: italic;">{story.summary[:150]}...</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Added 'i' to the button key so Streamlit doesn't get confused by duplicate buttons!
+                    if st.button("Read & Analyze ➔", key=f"read_{source_name}_{i}"):
+                        st.session_state.current_story = {
+                            "source": source_name,
+                            "title": story.title,
+                            "summary": story.summary,
+                            "link": story.link
+                        }
+                        st.session_state.view = "article"
+                        st.rerun()
         
         for source_name, url in SOURCES.items():
             feed = feedparser.parse(url)
@@ -274,4 +311,5 @@ elif page == "🦎 About Us":
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
 
