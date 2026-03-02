@@ -205,7 +205,7 @@ if page == "📰 Live News Feed":
                     
                 data = json.loads(raw_text)
                 
-                st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'>📝 Quick Summary</h3>", unsafe_allow_html=True)
+                st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'> Quick Summary</h3>", unsafe_allow_html=True)
                 for bullet in data["summary"]:
                     st.markdown(f"<li style='color: #475569; margin-bottom: 10px; font-family: Georgia, serif;'>{bullet}</li>", unsafe_allow_html=True)
                 
@@ -311,5 +311,6 @@ elif page == "🦎 About Us":
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
 
 
