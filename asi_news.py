@@ -1,6 +1,7 @@
 import streamlit as st
 from google import genai
 import feedparser
+import json
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -93,7 +94,7 @@ st.sidebar.image("https://img.icons8.com/color/96/chameleon.png", width=60)
 st.sidebar.title("ASI News")
 page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"])
 st.sidebar.markdown("---")
-st.sidebar.caption("Project for Global Business Environment made by Maria Carlota Gonçalves. Any problem please contact 62408@novasbe.pt")
+st.sidebar.caption("Project for the Global Business Environment course made by Maria Carlota Gonçalves. Any problem contact 62408@novasbe.pt")
 
 # ==========================================
 # PAGE 1: LIVE NEWS FEED
@@ -139,29 +140,92 @@ if page == "📰 Live News Feed":
                     # Create a unique key for the button so Streamlit doesn't get confused
                     btn_key = f"btn_{source_name}_{i}"
                     
-                    if st.button(f"🔍 Analyze Perspectives", key=btn_key):
-                        with st.spinner("AI is synthesizing global viewpoints..."):
+                    # The "Analyze" Button
+                if st.button(f"🔍 Analyze Perspectives", key=f"btn_{source_name}"):
+                    with st.spinner("AI is synthesizing global viewpoints..."):
+                        
+                        # THE NEW STRUCTURED PROMPT
+                        prompt = f"""
+                        Analyze this news: {story.title} - {story.summary}
+                        
+                        You are a geopolitical analyzer. You must output YOUR ENTIRE RESPONSE as a valid, raw JSON object. 
+                        DO NOT include any conversational text like "Here is the summary" or "As a journalist". Start directly with the {{ bracket.
+                        
+                        Use this EXACT JSON format:
+                        {{
+                          "summary": [
+                            "First bullet point summary (keep it concise).",
+                            "Second bullet point summary."
+                          ],
+                          "perspectives": [
+                            {{
+                              "title": "Name of Viewpoint 1 (e.g., EU Regulators)",
+                              "drivers": "First paragraph about drivers and motivations.\\n\\nSecond paragraph about drivers and motivations.",
+                              "context": "Analytical context including the historical background behind this point of view."
+                            }},
+                            {{
+                              "title": "Name of Viewpoint 2",
+                              "drivers": "First paragraph...\\n\\nSecond paragraph...",
+                              "context": "Analytical context..."
+                            }},
+                            {{
+                              "title": "Name of Viewpoint 3",
+                              "drivers": "First paragraph...\\n\\nSecond paragraph...",
+                              "context": "Analytical context..."
+                            }}
+                          ]
+                        }}
+                        """
+                        try:
+                            response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
                             
-                            prompt = f"""
-                            Act as a professional geopolitical journalist. 
-                            Read this news: {story.title} - {story.summary}
+                            # Clean the AI's text just in case it added markdown blocks
+                            raw_text = response.text.strip()
+                            if raw_text.startswith("```json"):
+                                raw_text = raw_text[7:-3].strip()
+                            elif raw_text.startswith("```"):
+                                raw_text = raw_text[3:-3].strip()
+                                
+                            # Convert text to a Python Dictionary
+                            analysis_data = json.loads(raw_text)
                             
-                            1. Write a clear, engaging 2-paragraph summary. Use professional but highly accessible language (no heavy jargon).
-                            2. Identify 3 distinct international or societal Points of View (e.g., EU Regulators, Developing Nations, Global Markets).
-                            3. For each Point of View, provide exactly 1 sentence of Historical Context explaining the root of their stance.
+                            # --- 1. RENDER THE SUMMARY ---
+                            st.markdown("### 📝 Quick Summary")
+                            for bullet in analysis_data["summary"]:
+                                st.markdown(f"- {bullet}")
                             
-                            Format with bold headers and bullet points.
-                            """
-                            try:
-                                response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
-                                st.success("Analysis Complete!")
-                                st.markdown(response.text)
-                                st.link_button(f"Read full original article on {source_name}", story.link)
-                                st.markdown("---")
-                            except Exception as e:
-                                st.error(f"Error connecting to AI: {e}")
-                    
-                    st.write("") # Little space between cards
+                            st.markdown("---")
+                            
+                            # --- 2. RENDER THE EMPATHY HEADERS ---
+                            st.markdown("<h3 style='color: #065f46;'>Perspectives</h3>", unsafe_allow_html=True)
+                            st.markdown("#### Explore How Others Experience This Story")
+                            st.caption("Take a moment to step outside your own perspective and explore how others experience this story.")
+                            
+                            # --- 3. RENDER THE SELECTABLE TABS ---
+                            # This creates a list of titles for the tabs
+                            tab_titles = [p["title"] for p in analysis_data["perspectives"]]
+                            
+                            # Create the Streamlit tabs
+                            tabs = st.tabs(tab_titles)
+                            
+                            # Fill each tab with its specific content
+                            for i, tab in enumerate(tabs):
+                                with tab:
+                                    st.markdown(f"<h4 style='color: #10b981; margin-top: 15px;'>{analysis_data['perspectives'][i]['title']}</h4>", unsafe_allow_html=True)
+                                    
+                                    st.markdown("**DRIVERS & MOTIVATIONS**")
+                                    st.write(analysis_data['perspectives'][i]['drivers'])
+                                    
+                                    st.markdown("**ANALYTICAL CONTEXT**")
+                                    st.info(analysis_data['perspectives'][i]['context']) # Puts history in a nice highlighted box!
+                            
+                            st.divider()
+                            st.link_button(f"Read full original article on {source_name}", story.link)
+                            st.markdown("---")
+                            
+                        except Exception as e:
+                            st.error(f"Error structuring AI response: {e}")
+                            st.info("The AI might have formatted the text incorrectly. Try clicking Analyze again!")
 
 # ==========================================
 # PAGE 2: ABOUT US
@@ -216,6 +280,7 @@ elif page == "🦎 About Us":
                 </ul>
             </div>
             """, unsafe_allow_html=True)
+
 
 
 
