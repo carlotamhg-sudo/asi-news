@@ -107,50 +107,60 @@ if page == "📰 Live News Feed":
         </div>
     """, unsafe_allow_html=True)
 
-    st.subheader("Trending Today")
-    
-    # Fetch headlines instantly
+    # --- THE MAGIC REFRESH BUTTON ---
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.subheader("Trending Today")
+    with col2:
+        if st.button("🔄 Refresh Live Feed", use_container_width=True):
+            st.rerun() # This forces the app to wake up and fetch new data immediately!
+
+    # Fetch headlines
     for source_name, url in SOURCES.items():
         feed = feedparser.parse(url)
-        if feed.entries:
-            story = feed.entries[0] # Get the top story
-            
-            # The UI Card for the story
-            with st.container():
-                st.markdown(f"""
-                    <div class="news-card">
-                        <span class="source-badge">{source_name.upper()}</span>
-                        <h3 style="margin-top: 5px;">{story.title}</h3>
-                        <p style="color: #64748b;">{story.summary[:150]}...</p>
-                    </div>
-                """, unsafe_allow_html=True)
+        
+        # Check if the feed has at least 2 stories
+        if len(feed.entries) >= 2:
+            # We will loop through the top 2 newest stories instead of just 1!
+            for i in range(2): 
+                story = feed.entries[i]
                 
-                # The "Analyze" Button - placed right under the card
-                if st.button(f"🔍 Analyze Perspectives", key=f"btn_{source_name}"):
-                    with st.spinner("AI is synthesizing global viewpoints..."):
-                        
-                        # THE PROFESSIONAL PROMPT
-                        prompt = f"""
-                        Act as a professional geopolitical journalist. 
-                        Read this news: {story.title} - {story.summary}
-                        
-                        1. Write a clear, engaging 2-paragraph summary. Use professional but highly accessible language (no heavy jargon).
-                        2. Identify 3 distinct international or societal Points of View (e.g., EU Regulators, Developing Nations, Global Markets).
-                        3. For each Point of View, provide a Historical Context explaining the root of their stance.
-                        
-                        Format with bold headers and bullet points.
-                        """
-                        try:
-                            response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
-                            st.success("Analysis Complete!")
-                            st.markdown(response.text)
-                            st.link_button(f"Read full original article on {source_name}", story.link)
-                            st.markdown("---")
-                        except Exception as e:
-                            st.error(f"Error connecting to AI: {e}")
-                
-                # Add a little space between news items
-                st.write("") 
+                # The UI Card for the story
+                with st.container():
+                    st.markdown(f"""
+                        <div class="news-card">
+                            <span class="source-badge">{source_name.upper()}</span>
+                            <h3 style="margin-top: 5px;">{story.title}</h3>
+                            <p style="color: #64748b;">{story.summary[:150]}...</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Create a unique key for the button so Streamlit doesn't get confused
+                    btn_key = f"btn_{source_name}_{i}"
+                    
+                    if st.button(f"🔍 Analyze Perspectives", key=btn_key):
+                        with st.spinner("AI is synthesizing global viewpoints..."):
+                            
+                            prompt = f"""
+                            Act as a professional geopolitical journalist. 
+                            Read this news: {story.title} - {story.summary}
+                            
+                            1. Write a clear, engaging 2-paragraph summary. Use professional but highly accessible language (no heavy jargon).
+                            2. Identify 3 distinct international or societal Points of View (e.g., EU Regulators, Developing Nations, Global Markets).
+                            3. For each Point of View, provide exactly 1 sentence of Historical Context explaining the root of their stance.
+                            
+                            Format with bold headers and bullet points.
+                            """
+                            try:
+                                response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                                st.success("Analysis Complete!")
+                                st.markdown(response.text)
+                                st.link_button(f"Read full original article on {source_name}", story.link)
+                                st.markdown("---")
+                            except Exception as e:
+                                st.error(f"Error connecting to AI: {e}")
+                    
+                    st.write("") # Little space between cards
 
 # ==========================================
 # PAGE 2: ABOUT US
@@ -183,5 +193,6 @@ elif page == "🦎 About Us":
         * 🧠 Google Gemini 2.5 AI
         * 📡 Global RSS Feeds
         """)
+
 
 
