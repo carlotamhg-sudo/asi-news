@@ -34,10 +34,13 @@ st.markdown("""
     .context-box { background-color: #fdf8f3; border: 1px solid #f6e8d9; border-radius: 12px; padding: 25px; margin-top: 20px; }
     .context-icon { color: #d97706; font-size: 1.2rem; font-weight: bold; margin-right: 10px; }
     
-    /* Custom Streamlit Overrides for Pills */
+    /* Custom Streamlit Overrides for Solid Green Pills */
     div[data-testid="stRadio"] > div { flex-direction: row; flex-wrap: wrap; gap: 10px; }
-    div[data-testid="stRadio"] label { background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 30px; cursor: pointer; }
-    div[data-testid="stRadio"] label[data-checked="true"] { background-color: #065f46; color: white; border-color: #065f46; }
+    div[data-testid="stRadio"] div[role="radio"] { display: none; } /* Hides the native radio circle completely */
+    div[data-testid="stRadio"] label { background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: all 0.2s;}
+    div[data-testid="stRadio"] label:hover { border-color: #065f46; }
+    div[data-testid="stRadio"] label[data-checked="true"] { background-color: #065f46 !important; border-color: #065f46 !important; }
+    div[data-testid="stRadio"] label[data-checked="true"] p { color: white !important; font-weight: bold; }
     
     /* SOBER EDITORIAL LISTS (For About Us Page) */
     .sober-list { list-style-type: none; padding-left: 0; margin-left: 0; }
@@ -55,11 +58,15 @@ else:
 
 MODEL_NAME = "gemini-2.5-flash"
 
-# --- STATE MANAGEMENT ---
+# --- STATE MANAGEMENT (Adding AI Memory) ---
 if "view" not in st.session_state:
     st.session_state.view = "feed"
 if "current_story" not in st.session_state:
     st.session_state.current_story = {}
+if "ai_analysis" not in st.session_state:
+    st.session_state.ai_analysis = None
+if "analyzed_url" not in st.session_state:
+    st.session_state.analyzed_url = ""
 
 # --- SOURCES ---
 SOURCES = {
@@ -76,7 +83,8 @@ SOURCES = {
 # --- NAVIGATION ---
 st.sidebar.image("https://img.icons8.com/color/96/chameleon.png", width=60)
 st.sidebar.title("ASI News")
-page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"])
+# label_visibility="collapsed" hides the "Navigation" title
+page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"], label_visibility="collapsed")
 st.sidebar.markdown("---")
 
 # ==========================================
@@ -85,24 +93,19 @@ st.sidebar.markdown("---")
 if page == "📰 Live News Feed":
     
     if st.session_state.view == "feed":
-        
-        # --- NEW HEADER WITH REFRESH BUTTON ---
         head_col, btn_col = st.columns([4, 1])
         with head_col:
             st.markdown("<h1 style='color: #065f46; font-family: Georgia, serif; margin-bottom: 0;'>ASI News Dashboard</h1>", unsafe_allow_html=True)
             st.markdown("<p style='color: #64748b; font-size: 1.1rem; margin-top: 5px;'>Select an article below to analyze global perspectives.</p>", unsafe_allow_html=True)
         with btn_col:
-            st.markdown("<br>", unsafe_allow_html=True) # Pushes the button down slightly to align perfectly
+            st.markdown("<br>", unsafe_allow_html=True) 
             if st.button("🔄 Refresh Live Feed", use_container_width=True):
                 st.rerun()
                 
         st.markdown("---")
         
-        # --- LOAD FEED (Top 2 Stories Per Source) ---
         for source_name, url in SOURCES.items():
             feed = feedparser.parse(url)
-            
-            # Check if feed has at least 2 stories
             if len(feed.entries) >= 2:
                 for i in range(2):
                     story = feed.entries[i]
@@ -115,7 +118,6 @@ if page == "📰 Live News Feed":
                         </div>
                     """, unsafe_allow_html=True)
                     
-                    # Added 'i' to the button key so Streamlit doesn't get confused by duplicate buttons!
                     if st.button("Read & Analyze ➔", key=f"read_{source_name}_{i}"):
                         st.session_state.current_story = {
                             "source": source_name,
@@ -125,29 +127,6 @@ if page == "📰 Live News Feed":
                         }
                         st.session_state.view = "article"
                         st.rerun()
-        
-        for source_name, url in SOURCES.items():
-            feed = feedparser.parse(url)
-            if feed.entries:
-                story = feed.entries[0]
-                
-                st.markdown(f"""
-                    <div class="news-feed-card">
-                        <span class="source-badge-grey">{source_name.upper()}</span>
-                        <h3 style="margin-top: 15px; color: #1e293b; font-family: Georgia, serif;">{story.title}</h3>
-                        <p style="color: #64748b; font-family: Georgia, serif; font-style: italic;">{story.summary[:150]}...</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                if st.button("Read & Analyze ➔", key=f"read_{source_name}"):
-                    st.session_state.current_story = {
-                        "source": source_name,
-                        "title": story.title,
-                        "summary": story.summary,
-                        "link": story.link
-                    }
-                    st.session_state.view = "article"
-                    st.rerun()
 
     elif st.session_state.view == "article":
         story = st.session_state.current_story
@@ -170,73 +149,86 @@ if page == "📰 Live News Feed":
         st.link_button("Read original article ↗", story['link'])
         st.markdown("---")
         
-        st.markdown("<div class='grey-caps' style='color: #065f46;'>PERSPECTIVES</div>", unsafe_allow_html=True)
-        st.markdown("<div class='serif-title' style='font-size: 2.2rem;'>Explore How Others Experience This Story</div>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #64748b; font-size: 1.1rem; margin-bottom: 30px;'>Take a moment to step outside your own perspective and explore how others experience this story.</p>", unsafe_allow_html=True)
-
-        with st.spinner("Generating AI perspectives..."):
-            prompt = f"""
-            Analyze this news: {story['title']} - {story['summary']}
-            
-            Output strictly as JSON. No conversational text.
-            Format exactly like this, using ONLY arrays of strings (bullet points) for the content:
-            {{
-              "summary": ["Point 1", "Point 2"],
-              "perspectives": [
+        # --- AI GENERATION WITH MEMORY ---
+        # Only call the AI if we haven't analyzed this specific URL yet
+        if st.session_state.analyzed_url != story['link']:
+            with st.spinner("Generating AI perspectives..."):
+                prompt = f"""
+                Analyze this news: {story['title']} - {story['summary']}
+                
+                Output strictly as JSON. 
+                Write DETAILED, highly comprehensive explanations. Each bullet point MUST be at least 2-3 sentences long to ensure the reader fully grasps the nuances.
+                
+                Format exactly like this, using ONLY arrays of strings for the content:
                 {{
-                  "title": "Name of Viewpoint 1",
-                  "drivers": ["Motivation bullet 1", "Motivation bullet 2"],
-                  "context": ["Historical context bullet 1", "Historical context bullet 2"]
-                }},
-                {{
-                  "title": "Name of Viewpoint 2",
-                  "drivers": ["Motivation bullet 1", "Motivation bullet 2"],
-                  "context": ["Historical context bullet 1", "Historical context bullet 2"]
+                  "summary": ["Detailed summary bullet 1...", "Detailed summary bullet 2..."],
+                  "perspectives": [
+                    {{
+                      "title": "Name of Viewpoint 1",
+                      "drivers": ["Detailed motivation explanation 1...", "Detailed motivation explanation 2..."],
+                      "context": ["Detailed historical context 1...", "Detailed historical context 2..."]
+                    }},
+                    {{
+                      "title": "Name of Viewpoint 2",
+                      "drivers": ["Detailed motivation explanation 1...", "Detailed motivation explanation 2..."],
+                      "context": ["Detailed historical context 1...", "Detailed historical context 2..."]
+                    }}
+                  ]
                 }}
-              ]
-            }}
-            """
-            try:
-                response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                """
+                try:
+                    response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
+                    raw_text = response.text.strip()
+                    if raw_text.startswith("```json"): raw_text = raw_text[7:-3].strip()
+                    elif raw_text.startswith("```"): raw_text = raw_text[3:-3].strip()
+                        
+                    st.session_state.ai_analysis = json.loads(raw_text)
+                    st.session_state.analyzed_url = story['link']
+                except Exception as e:
+                    st.error(f"Error parsing AI analysis: {e}")
+                    if st.button("Retry Analysis"):
+                        st.session_state.analyzed_url = "" # Reset to force a retry
+                        st.rerun()
+                        
+        # --- RENDERING THE STORED DATA ---
+        if st.session_state.ai_analysis:
+            data = st.session_state.ai_analysis
+            
+            # QUICK SUMMARY FIRST
+            st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'>📝 Quick Summary</h3>", unsafe_allow_html=True)
+            for bullet in data["summary"]:
+                st.markdown(f"<li style='color: #475569; margin-bottom: 12px; line-height: 1.6; font-family: Georgia, serif;'>{bullet}</li>", unsafe_allow_html=True)
+            
+            st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
+            
+            # PERSPECTIVES SECTION AFTER
+            st.markdown("<div class='grey-caps' style='color: #065f46;'>PERSPECTIVES</div>", unsafe_allow_html=True)
+            st.markdown("<div class='serif-title' style='font-size: 2.2rem;'>Explore How Others Experience This Story</div>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #64748b; font-size: 1.1rem; margin-bottom: 25px;'>Take a moment to step outside your own perspective and explore how others experience this story.</p>", unsafe_allow_html=True)
+
+            perspective_titles = [p["title"] for p in data["perspectives"]]
+            selected_tab = st.radio("Select a viewpoint:", perspective_titles, label_visibility="collapsed")
+            active_data = next(item for item in data["perspectives"] if item["title"] == selected_tab)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            st.markdown(f"<div class='grey-caps'>{active_data['title']}</div>", unsafe_allow_html=True)
+            st.markdown("<div class='grey-caps'>DRIVERS & MOTIVATIONS</div>", unsafe_allow_html=True)
+            for driver in active_data['drivers']:
+                st.markdown(f"<div class='serif-text'>• {driver}</div>", unsafe_allow_html=True)
+            
+            # BULLETED CONTEXT BOX
+            st.markdown("""
+                <div class="context-box">
+                    <div class="grey-caps" style="color: #b45309; margin-bottom: 15px;"><span class="context-icon">!</span> ANALYTICAL CONTEXT</div>
+                    <ul style="color: #334155; font-family: 'Georgia', serif; font-size: 1.1rem; line-height: 1.6; padding-left: 20px;">
+            """, unsafe_allow_html=True)
+            
+            for ctx in active_data['context']:
+                st.markdown(f"<li style='margin-bottom: 12px;'>{ctx}</li>", unsafe_allow_html=True)
                 
-                raw_text = response.text.strip()
-                if raw_text.startswith("```json"): raw_text = raw_text[7:-3].strip()
-                elif raw_text.startswith("```"): raw_text = raw_text[3:-3].strip()
-                    
-                data = json.loads(raw_text)
-                
-                st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'> Quick Summary</h3>", unsafe_allow_html=True)
-                for bullet in data["summary"]:
-                    st.markdown(f"<li style='color: #475569; margin-bottom: 10px; font-family: Georgia, serif;'>{bullet}</li>", unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                perspective_titles = [p["title"] for p in data["perspectives"]]
-                selected_tab = st.radio("Select a viewpoint:", perspective_titles, label_visibility="collapsed")
-                active_data = next(item for item in data["perspectives"] if item["title"] == selected_tab)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                st.markdown(f"<div class='grey-caps'>{active_data['title']}</div>", unsafe_allow_html=True)
-                st.markdown("<div class='grey-caps'>DRIVERS & MOTIVATIONS</div>", unsafe_allow_html=True)
-                for driver in active_data['drivers']:
-                    st.markdown(f"<div class='serif-text'>• {driver}</div>", unsafe_allow_html=True)
-                
-                st.markdown("""
-                    <div class="context-box">
-                        <div class="grey-caps" style="color: #b45309;"><span class="context-icon">!</span> ANALYTICAL CONTEXT</div>
-                """, unsafe_allow_html=True)
-                
-                for ctx in active_data['context']:
-                    st.markdown(f"<div class='serif-text' style='margin-left: 25px;'>• {ctx}</div>", unsafe_allow_html=True)
-                    
-                st.markdown("</div>", unsafe_allow_html=True)
-                st.markdown("<br><br>", unsafe_allow_html=True)
-                
-            except Exception as e:
-                st.error(f"Error parsing AI analysis: {e}")
-                if st.button("Retry Analysis"):
-                    st.rerun()
+            st.markdown("</ul></div>", unsafe_allow_html=True)
+            st.markdown("<br><br>", unsafe_allow_html=True)
 
 # ==========================================
 # PAGE 2: ABOUT US
@@ -306,11 +298,8 @@ elif page == "🦎 About Us":
             <div class='grey-caps' style="color: #475569; margin-top: 0; margin-bottom: 15px;"><span class='sober-icon'>⚡</span> Powered By</div>
             <ul class='sober-list serif-text' style="color: #334155; font-size: 1.05rem; line-height: 1.8; margin-bottom: 0;">
                 <li><span class='sober-icon'>🐍</span> <span>Python & Streamlit</span></li>
-                <li><span class='sober-icon'>🧠</span> <span>Google Gemini AI</span></li>
+                <li><span class='sober-icon'>🧠</span> <span>Google Gemini 2.5 AI</span></li>
                 <li><span class='sober-icon'>📡</span> <span>Global RSS Feeds</span></li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
-
-
-
