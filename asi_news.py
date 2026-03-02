@@ -8,7 +8,7 @@ st.set_page_config(
     page_title="ASI News | All Sides Included", 
     page_icon="🦎", 
     layout="wide",
-    initial_sidebar_state="expanded" # Keep sidebar open for navigation
+    initial_sidebar_state="expanded" 
 )
 
 # --- EDITORIAL CSS STYLING ---
@@ -38,6 +38,11 @@ st.markdown("""
     div[data-testid="stRadio"] > div { flex-direction: row; flex-wrap: wrap; gap: 10px; }
     div[data-testid="stRadio"] label { background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 30px; cursor: pointer; }
     div[data-testid="stRadio"] label[data-checked="true"] { background-color: #065f46; color: white; border-color: #065f46; }
+    
+    /* SOBER EDITORIAL LISTS (For About Us Page) */
+    .sober-list { list-style-type: none; padding-left: 0; margin-left: 0; }
+    .sober-list li { margin-bottom: 12px; padding-left: 1.8em; text-indent: -1.8em; }
+    .sober-icon { filter: grayscale(100%) opacity(65%); display: inline-block; width: 1.8em; text-indent: 0; text-align: left; font-style: normal;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -79,13 +84,11 @@ st.sidebar.markdown("---")
 # ==========================================
 if page == "📰 Live News Feed":
     
-    # -- THE HOME FEED --
     if st.session_state.view == "feed":
         st.markdown("<h1 style='color: #065f46; font-family: Georgia, serif;'>ASI News Dashboard</h1>", unsafe_allow_html=True)
         st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>Select an article below to analyze global perspectives.</p>", unsafe_allow_html=True)
         st.markdown("---")
         
-        # Load Feed
         for source_name, url in SOURCES.items():
             feed = feedparser.parse(url)
             if feed.entries:
@@ -109,7 +112,6 @@ if page == "📰 Live News Feed":
                     st.session_state.view = "article"
                     st.rerun()
 
-    # -- THE ARTICLE READING PAGE --
     elif st.session_state.view == "article":
         story = st.session_state.current_story
         
@@ -166,7 +168,7 @@ if page == "📰 Live News Feed":
                     
                 data = json.loads(raw_text)
                 
-                st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'> Quick Summary</h3>", unsafe_allow_html=True)
+                st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'>📝 Quick Summary</h3>", unsafe_allow_html=True)
                 for bullet in data["summary"]:
                     st.markdown(f"<li style='color: #475569; margin-bottom: 10px; font-family: Georgia, serif;'>{bullet}</li>", unsafe_allow_html=True)
                 
@@ -203,7 +205,6 @@ if page == "📰 Live News Feed":
 # PAGE 2: ABOUT US
 # ==========================================
 elif page == "🦎 About Us":
-    # Reset view to feed in case they navigate back to Live News
     st.session_state.view = "feed" 
     
     st.markdown("<div class='serif-title' style='font-size: 2.8rem;'>About ASI News</div>", unsafe_allow_html=True)
@@ -220,69 +221,56 @@ elif page == "🦎 About Us":
         st.markdown("<div class='serif-text'>In today's polarized world, news is often presented through a single lens. This creates echo chambers where people only hear views that match their own. We believe that true understanding comes from exploring multiple perspectives. Like a chameleon that adapts and sees the world from many angles, ASI News — All Sides Included — helps you understand why people agree, disagree, or remain uncertain about important events. Our AI-powered analysis presents these viewpoints in a simple, empathetic way — making complex global events accessible to students, professionals, and curious minds of all ages.</div>", unsafe_allow_html=True)
         
         st.markdown("<div class='green-subtitle'>How It Works</div>", unsafe_allow_html=True)
+        st.markdown("<div class='serif-text'>We aggregate real-time data from the world's leading publications—including Reuters, AP News, Al Jazeera, and The Financial Times. Then, our custom AI engine analyzes the stories to:</div>", unsafe_allow_html=True)
         st.markdown("""
-        <div class='serif-text'>We aggregate real-time data from the world's leading publications—including Reuters, AP News, Al Jazeera, and The Financial Times. Then, our custom AI engine analyzes the stories to:</div>
-        <ul class='serif-text' style='margin-left: 20px;'>
-            <li style='margin-bottom: 8px;'>📝 Provide clear, bias-free summaries.</li>
-            <li style='margin-bottom: 8px;'>🌍 Highlight differing global perspectives.</li>
-            <li style='margin-bottom: 8px;'>🕰️ Inject vital historical context so you understand the <em>why</em> behind the news.</li>
+        <ul class='sober-list serif-text'>
+            <li><span class='sober-icon'>📝</span> <span>Provide clear, bias-free summaries.</span></li>
+            <li><span class='sober-icon'>🌍</span> <span>Highlight differing global perspectives.</span></li>
+            <li><span class='sober-icon'>🕰️</span> <span>Inject vital historical context so you understand the <em>why</em> behind the news.</span></li>
         </ul>
         """, unsafe_allow_html=True)
         
         st.markdown("<div class='green-subtitle'>Our Values</div>", unsafe_allow_html=True)
         st.markdown("""
-        <ul class='serif-text' style='margin-left: 20px;'>
-            <li style='margin-bottom: 8px;'>🔍 <strong>Objectivity:</strong> We present all sides of a story without bias, allowing readers to form their own informed opinions.</li>
-            <li style='margin-bottom: 8px;'>🤝 <strong>Empathy:</strong> Understanding different perspectives helps us connect with people across cultures and viewpoints.</li>
-            <li style='margin-bottom: 8px;'>🌐 <strong>Trust:</strong> We only source from established, reputable news organizations with proven track records.</li>
-            <li style='margin-bottom: 8px;'>💡 <strong>Accessibility:</strong> Complex global events explained in simple, clear language for everyone to understand.</li>
+        <ul class='sober-list serif-text'>
+            <li><span class='sober-icon'>🔍</span> <span><strong>Objectivity:</strong> We present all sides of a story without bias, allowing readers to form their own informed opinions.</span></li>
+            <li><span class='sober-icon'>🤝</span> <span><strong>Empathy:</strong> Understanding different perspectives helps us connect with people across cultures and viewpoints.</span></li>
+            <li><span class='sober-icon'>🌐</span> <span><strong>Trust:</strong> We only source from established, reputable news organizations with proven track records.</span></li>
+            <li><span class='sober-icon'>💡</span> <span><strong>Accessibility:</strong> Complex global events explained in simple, clear language for everyone to understand.</span></li>
         </ul>
         """, unsafe_allow_html=True)
 
         st.markdown("<div class='green-subtitle'>Trusted Sources Only</div>", unsafe_allow_html=True)
         st.markdown("<div class='serif-text'>We exclusively source our news from globally recognized, reputable news organizations known for their journalistic integrity and fact-based reporting.</div>", unsafe_allow_html=True)
         
-        # Split sources into two neat columns for better design
         s_col1, s_col2 = st.columns(2)
         with s_col1:
             st.markdown("""
-            <ul class='serif-text' style='list-style-type: none; padding-left: 0;'>
-                <li style='margin-bottom: 5px;'>📰 Al Jazeera</li>
-                <li style='margin-bottom: 5px;'>📰 AP News</li>
-                <li style='margin-bottom: 5px;'>📰 BBC News</li>
-                <li style='margin-bottom: 5px;'>📰 Deutsche Welle</li>
+            <ul class='sober-list serif-text'>
+                <li><span class='sober-icon'>📰</span> <span>Al Jazeera</span></li>
+                <li><span class='sober-icon'>📰</span> <span>AP News</span></li>
+                <li><span class='sober-icon'>📰</span> <span>BBC News</span></li>
+                <li><span class='sober-icon'>📰</span> <span>Deutsche Welle</span></li>
             </ul>
             """, unsafe_allow_html=True)
         with s_col2:
             st.markdown("""
-            <ul class='serif-text' style='list-style-type: none; padding-left: 0;'>
-                <li style='margin-bottom: 5px;'>📰 Financial Times</li>
-                <li style='margin-bottom: 5px;'>📰 Reuters</li>
-                <li style='margin-bottom: 5px;'>📰 The Economist</li>
-                <li style='margin-bottom: 5px;'>📰 The Guardian</li>
+            <ul class='sober-list serif-text'>
+                <li><span class='sober-icon'>📰</span> <span>Financial Times</span></li>
+                <li><span class='sober-icon'>📰</span> <span>Reuters</span></li>
+                <li><span class='sober-icon'>📰</span> <span>The Economist</span></li>
+                <li><span class='sober-icon'>📰</span> <span>The Guardian</span></li>
             </ul>
             """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style="background-color: #d1fae5; padding: 25px; border-radius: 12px; border-left: 5px solid #10b981; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: sticky; top: 20px;">
-            <div class='grey-caps' style="color: #065f46; margin-top: 0; margin-bottom: 15px;">⚡ Powered By</div>
-            <ul class='serif-text' style="color: #334155; font-size: 1.05rem; line-height: 1.8; margin-left: 0; padding-left: 20px;">
-                <li>🐍 Python & Streamlit</li>
-                <li>🧠 Google Gemini AI</li>
-                <li>📡 Global RSS Feeds</li>
+        <div style="background-color: #f8fafc; padding: 25px; border-radius: 8px; border: 1px solid #e2e8f0; border-top: 4px solid #64748b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: sticky; top: 20px;">
+            <div class='grey-caps' style="color: #475569; margin-top: 0; margin-bottom: 15px;"><span class='sober-icon'>⚡</span> Powered By</div>
+            <ul class='sober-list serif-text' style="color: #334155; font-size: 1.05rem; line-height: 1.8; margin-bottom: 0;">
+                <li><span class='sober-icon'>🐍</span> <span>Python & Streamlit</span></li>
+                <li><span class='sober-icon'>🧠</span> <span>Google Gemini AI</span></li>
+                <li><span class='sober-icon'>📡</span> <span>Global RSS Feeds</span></li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
-
