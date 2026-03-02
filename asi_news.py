@@ -36,7 +36,7 @@ st.markdown("""
     
     /* Custom Streamlit Overrides for Solid Green Pills */
     div[data-testid="stRadio"] > div { flex-direction: row; flex-wrap: wrap; gap: 10px; }
-    div[data-testid="stRadio"] div[role="radio"] { display: none; } /* Hides the native radio circle completely */
+    div[data-testid="stRadio"] div[role="radio"] { display: none; }
     div[data-testid="stRadio"] label { background-color: white; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: all 0.2s;}
     div[data-testid="stRadio"] label:hover { border-color: #065f46; }
     div[data-testid="stRadio"] label[data-checked="true"] { background-color: #065f46 !important; border-color: #065f46 !important; }
@@ -58,7 +58,7 @@ else:
 
 MODEL_NAME = "gemini-2.5-flash"
 
-# --- STATE MANAGEMENT (Adding AI Memory) ---
+# --- STATE MANAGEMENT ---
 if "view" not in st.session_state:
     st.session_state.view = "feed"
 if "current_story" not in st.session_state:
@@ -83,7 +83,6 @@ SOURCES = {
 # --- NAVIGATION ---
 st.sidebar.image("https://img.icons8.com/color/96/chameleon.png", width=60)
 st.sidebar.title("ASI News")
-# label_visibility="collapsed" hides the "Navigation" title
 page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"], label_visibility="collapsed")
 st.sidebar.markdown("---")
 
@@ -149,29 +148,27 @@ if page == "📰 Live News Feed":
         st.link_button("Read original article ↗", story['link'])
         st.markdown("---")
         
-        # --- AI GENERATION WITH MEMORY ---
-        # Only call the AI if we haven't analyzed this specific URL yet
         if st.session_state.analyzed_url != story['link']:
             with st.spinner("Generating AI perspectives..."):
                 prompt = f"""
                 Analyze this news: {story['title']} - {story['summary']}
                 
                 Output strictly as JSON. 
-                Write DETAILED, highly comprehensive explanations. Each bullet point MUST be at least 2-3 sentences long to ensure the reader fully grasps the nuances.
+                Write clear, informative, yet concise explanations. Each bullet point MUST be exactly 1 to 2 well-crafted sentences. Do not clutter the mobile screen.
                 
                 Format exactly like this, using ONLY arrays of strings for the content:
                 {{
-                  "summary": ["Detailed summary bullet 1...", "Detailed summary bullet 2..."],
+                  "summary": ["Concise summary bullet 1...", "Concise summary bullet 2..."],
                   "perspectives": [
                     {{
                       "title": "Name of Viewpoint 1",
-                      "drivers": ["Detailed motivation explanation 1...", "Detailed motivation explanation 2..."],
-                      "context": ["Detailed historical context 1...", "Detailed historical context 2..."]
+                      "drivers": ["Concise motivation explanation 1...", "Concise motivation explanation 2..."],
+                      "context": ["Concise historical context 1...", "Concise historical context 2..."]
                     }},
                     {{
                       "title": "Name of Viewpoint 2",
-                      "drivers": ["Detailed motivation explanation 1...", "Detailed motivation explanation 2..."],
-                      "context": ["Detailed historical context 1...", "Detailed historical context 2..."]
+                      "drivers": ["Concise motivation explanation 1...", "Concise motivation explanation 2..."],
+                      "context": ["Concise historical context 1...", "Concise historical context 2..."]
                     }}
                   ]
                 }}
@@ -187,21 +184,20 @@ if page == "📰 Live News Feed":
                 except Exception as e:
                     st.error(f"Error parsing AI analysis: {e}")
                     if st.button("Retry Analysis"):
-                        st.session_state.analyzed_url = "" # Reset to force a retry
+                        st.session_state.analyzed_url = "" 
                         st.rerun()
                         
-        # --- RENDERING THE STORED DATA ---
         if st.session_state.ai_analysis:
             data = st.session_state.ai_analysis
             
-            # QUICK SUMMARY FIRST
-            st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'>📝 Quick Summary</h3>", unsafe_allow_html=True)
+            # QUICK SUMMARY (Emoji removed)
+            st.markdown("<h3 style='color: #334155; font-family: Georgia, serif;'>Quick Summary</h3>", unsafe_allow_html=True)
             for bullet in data["summary"]:
                 st.markdown(f"<li style='color: #475569; margin-bottom: 12px; line-height: 1.6; font-family: Georgia, serif;'>{bullet}</li>", unsafe_allow_html=True)
             
             st.markdown("<hr style='margin: 30px 0;'>", unsafe_allow_html=True)
             
-            # PERSPECTIVES SECTION AFTER
+            # PERSPECTIVES
             st.markdown("<div class='grey-caps' style='color: #065f46;'>PERSPECTIVES</div>", unsafe_allow_html=True)
             st.markdown("<div class='serif-title' style='font-size: 2.2rem;'>Explore How Others Experience This Story</div>", unsafe_allow_html=True)
             st.markdown("<p style='color: #64748b; font-size: 1.1rem; margin-bottom: 25px;'>Take a moment to step outside your own perspective and explore how others experience this story.</p>", unsafe_allow_html=True)
@@ -217,18 +213,18 @@ if page == "📰 Live News Feed":
             for driver in active_data['drivers']:
                 st.markdown(f"<div class='serif-text'>• {driver}</div>", unsafe_allow_html=True)
             
-            # BULLETED CONTEXT BOX
-            st.markdown("""
+            # BULLETED CONTEXT BOX (Unified HTML block)
+            context_html = """
                 <div class="context-box">
                     <div class="grey-caps" style="color: #b45309; margin-bottom: 15px;"><span class="context-icon">!</span> ANALYTICAL CONTEXT</div>
-                    <ul style="color: #334155; font-family: 'Georgia', serif; font-size: 1.1rem; line-height: 1.6; padding-left: 20px;">
-            """, unsafe_allow_html=True)
-            
+                    <ul style="color: #334155; font-family: 'Georgia', serif; font-size: 1.1rem; line-height: 1.6; padding-left: 20px; margin-bottom: 0;">
+            """
             for ctx in active_data['context']:
-                st.markdown(f"<li style='margin-bottom: 12px;'>{ctx}</li>", unsafe_allow_html=True)
-                
-            st.markdown("</ul></div>", unsafe_allow_html=True)
-            st.markdown("<br><br>", unsafe_allow_html=True)
+                context_html += f"<li style='margin-bottom: 12px;'>{ctx}</li>"
+            
+            context_html += "</ul></div><br><br>"
+            
+            st.markdown(context_html, unsafe_allow_html=True)
 
 # ==========================================
 # PAGE 2: ABOUT US
