@@ -177,8 +177,8 @@ elif page == "🦎 About Us":
         ### Our Mission
         To foster empathy and global understanding by providing objective, multi-perspective analysis of the world's most important news — because all sides must be included.
 
-        THE PROBLEM
         ### Why We Built ASI News
+        THE PROBLEM
         In today's polarized world, news is often presented through a single lens. This creates echo chambers where people only hear views that match their own. We believe that true understanding comes from exploring multiple perspectives. Like a chameleon that adapts and sees the world from many angles, ASI News — All Sides Included — helps you understand why people agree, disagree, or remain uncertain about important events. Our AI-powered analysis presents these viewpoints in a simple, empathetic way — making complex global events accessible to students, professionals, and curious minds of all ages.
         
         ### How It Works
