@@ -210,12 +210,13 @@ elif page == "🦎 About Us":
             <div style="background-color: #d1fae5; padding: 20px; border-radius: 16px; border-left: 5px solid #10b981; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
                 <h4 style="color: #065f46; margin-top: 0;">⚡ Powered By:</h4>
                 <ul style="color: #334155; font-size: 0.95rem; line-height: 1.8;">
-                    🐍 Python & Streamlit
-                    🧠 Google Gemini AI
-                    📡 Global RSS Feeds
+                    <li>🐍 Python & Streamlit</li>
+                    <li>🧠 Google Gemini AI</li>
+                    <li>📡 Global RSS Feeds</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
+
 
 
 
