@@ -4,7 +4,7 @@ import feedparser
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="ASI News | Global Pulse", 
+    page_title="ASI News | All Sides Included", 
     page_icon="🦎", 
     layout="wide",
     initial_sidebar_state="expanded"
@@ -84,7 +84,8 @@ SOURCES = {
     "The Guardian": "https://www.theguardian.com/world/rss",
     "The Economist": "https://www.economist.com/international/rss.xml",
     "Financial Times": "https://www.ft.com/?format=rss",
-    "Deutsche Welle": "https://rss.dw.com/rdf/rss-en-all"
+    "Deutsche Welle": "https://rss.dw.com/rdf/rss-en-all",
+    "AP News": "https://rsshub.app/apnews/topics/ap-top-news"
 }
 
 # --- NAVIGATION ---
@@ -174,25 +175,48 @@ elif page == "🦎 About Us":
     with col1:
         st.markdown("""
         ### Our Mission
-        In today's interconnected world, reading just one news source isn't enough. **ASI News** was built to break filter bubbles and provide a 360-degree view of global events.
+        To foster empathy and global understanding by providing objective, multi-perspective analysis of the world's most important news — because all sides must be included.
+
+        THE PROBLEM
+        ### Why We Built ASI News
+        In today's polarized world, news is often presented through a single lens. This creates echo chambers where people only hear views that match their own. We believe that true understanding comes from exploring multiple perspectives. Like a chameleon that adapts and sees the world from many angles, ASI News — All Sides Included — helps you understand why people agree, disagree, or remain uncertain about important events. Our AI-powered analysis presents these viewpoints in a simple, empathetic way — making complex global events accessible to students, professionals, and curious minds of all ages.
         
         ### How It Works
         We aggregate real-time data from the world's leading publications—including Reuters, AP News, Al Jazeera, and The Financial Times. Then, our custom AI engine analyzes the stories to:
-        * 📝 Provide clear, bias-free summaries.
-        * 🌍 Highlight differing global perspectives.
-        * 🕰️ Inject vital historical context so you understand the *why* behind the news.
+        📝 Provide clear, bias-free summaries.
+        🌍 Highlight differing global perspectives.
+        🕰️ Inject vital historical context so you understand the *why* behind the news.
         
-        ### Built For
-        This platform was developed as a comprehensive project for the **Global Business Environment** class, demonstrating the intersection of international relations, market economics, and modern AI technology.
+        ### Our Values
+        🔍 Objectivity: We present all sides of a story without bias, allowing readers to form their own informed opinions.
+        🤝 Empathy: Understanding different perspectives helps us connect with people across cultures and viewpoints.
+        🌐 Trust: We only source from established, reputable news organizations with proven track records.
+        💡 Accessibility: Complex global events explained in simple, clear language for everyone to understand.
+
+        ### Trusted Sources Only
+        We exclusively source our news from globally recognized, reputable news organizations known for their journalistic integrity and fact-based reporting.
+        📰 Al Jazeera    
+        📰 AP News 
+        📰 BBC News
+        📰 Deutsche Welle
+        📰 Financial Times
+        📰 Reuters
+        📰 The Economist
+        📰 The Guardian
         """)
     
     with col2:
-        st.info("**Powered By:**")
-        st.markdown("""
-        * 🐍 Python & Streamlit
-        * 🧠 Google Gemini 2.5 AI
-        * 📡 Global RSS Feeds
-        """)
+            st.markdown("""
+            <div style="background-color: #d1fae5; padding: 20px; border-radius: 16px; border-left: 5px solid #10b981; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <h4 style="color: #065f46; margin-top: 0;">⚡ Powered By:</h4>
+                <ul style="color: #334155; font-size: 0.95rem; line-height: 1.8;">
+                    🐍 Python & Streamlit
+                    🧠 Google Gemini AI
+                    📡 Global RSS Feeds
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
 
 
 
