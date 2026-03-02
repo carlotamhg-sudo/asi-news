@@ -188,10 +188,10 @@ elif page == "🦎 About Us":
         🕰️ Inject vital historical context so you understand the *why* behind the news.
         
         ### Our Values
-        # 🔍 Objectivity: We present all sides of a story without bias, allowing readers to form their own informed opinions.
-        # 🤝 Empathy: Understanding different perspectives helps us connect with people across cultures and viewpoints.
-        # 🌐 Trust: We only source from established, reputable news organizations with proven track records.
-        # 💡 Accessibility: Complex global events explained in simple, clear language for everyone to understand.
+        #### 🔍 Objectivity: We present all sides of a story without bias, allowing readers to form their own informed opinions.
+        #### 🤝 Empathy: Understanding different perspectives helps us connect with people across cultures and viewpoints.
+        #### 🌐 Trust: We only source from established, reputable news organizations with proven track records.
+        #### 💡 Accessibility: Complex global events explained in simple, clear language for everyone to understand.
 
         ### Trusted Sources Only
         We exclusively source our news from globally recognized, reputable news organizations known for their journalistic integrity and fact-based reporting.
@@ -216,6 +216,7 @@ elif page == "🦎 About Us":
                 </ul>
             </div>
             """, unsafe_allow_html=True)
+
 
 
 
