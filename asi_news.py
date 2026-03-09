@@ -86,6 +86,15 @@ st.sidebar.title("ASI News")
 page = st.sidebar.radio("Navigation", ["Live News Feed", "About Us"], label_visibility="collapsed")
 st.sidebar.markdown("---")
 
+# --- ADDED CLASS DISCLAIMER ---
+st.sidebar.markdown("""
+    <p style='font-size: 0.85rem; color: #64748b; line-height: 1.5;'>
+        This website was created as a project for the <strong>Global Business Environment</strong> class.<br><br>
+        If there are any problems, contact:<br>
+        <a href='mailto:62408@novasbe.pt' style='color: #065f46; text-decoration: none; font-weight: bold;'>62408@novasbe.pt</a>
+    </p>
+""", unsafe_allow_html=True)
+
 # ==========================================
 # PAGE 1: LIVE NEWS FEED & ARTICLE VIEW
 # ==========================================
@@ -299,4 +308,5 @@ elif page == "About Us":
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
 
