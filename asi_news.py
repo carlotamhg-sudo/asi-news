@@ -71,13 +71,13 @@ if "analyzed_url" not in st.session_state:
 # --- SOURCES ---
 SOURCES = {
     "Reuters": "https://www.reutersagency.com/feed/?best-sectors=world-news",
-    "AP News": "https://apnews.com/hub/international-news.rss",
+    "AP News": "https://apnews.com/hub/world-news.rss",
     "BBC News": "http://feeds.bbci.co.uk/news/world/rss.xml",
     "Al Jazeera": "https://www.aljazeera.com/xml/rss/all.xml",
     "The Guardian": "https://www.theguardian.com/world/rss",
     "The Economist": "https://www.economist.com/international/rss.xml",
-    "Financial Times": "https://www.ft.com/?format=rss",
-    "Deutsche Welle": "https://rss.dw.com/rdf/rss-en-all"
+    "Financial Times": "https://www.ft.com/global-economy?format=rss", # Upgraded to Global Economy
+    "Deutsche Welle": "https://rss.dw.com/rdf/rss-en-world" # Upgraded to strictly World News
 }
 
 # --- NAVIGATION ---
@@ -112,17 +112,39 @@ if page == "Live News Feed":
                 
         st.markdown("---")
         
+        # --- CUSTOM NOISE FILTER ALGORITHM ---
+        def is_relevant(title, summary):
+            text = (title + " " + summary).lower()
+            # Banned keywords that indicate non-geopolitical/non-business news
+            banned_words = [
+                "football", "soccer", "tennis", "basketball", "celebrity", "gossip", 
+                "hollywood", "movie", "actor", "actress", "singer", "pop star", 
+                "royal family", "premier league", "champions league", "oscars", 
+                "red carpet", "netflix", "kardashian", "grand slam"
+            ]
+            return not any(word in text for word in banned_words)
+
+        # --- LOAD FEED ---
         for source_name, url in SOURCES.items():
             feed = feedparser.parse(url)
-            if len(feed.entries) >= 2:
+            
+            # Step 1: Filter out the junk using our algorithm
+            clean_stories = []
+            for entry in feed.entries:
+                summary_text = entry.get('summary', '')
+                if is_relevant(entry.title, summary_text):
+                    clean_stories.append(entry)
+            
+            # Step 2: Only display if we have at least 2 clean, geopolitical stories
+            if len(clean_stories) >= 2:
                 for i in range(2):
-                    story = feed.entries[i]
+                    story = clean_stories[i]
                     
                     st.markdown(f"""
                         <div class="news-feed-card">
                             <span class="source-badge-grey">{source_name.upper()}</span>
                             <h3 style="margin-top: 15px; color: #1e293b; font-family: Georgia, serif;">{story.title}</h3>
-                            <p style="color: #64748b; font-family: Georgia, serif; font-style: italic;">{story.summary[:150]}...</p>
+                            <p style="color: #64748b; font-family: Georgia, serif; font-style: italic;">{story.get('summary', '')[:150]}...</p>
                         </div>
                     """, unsafe_allow_html=True)
                     
@@ -130,7 +152,7 @@ if page == "Live News Feed":
                         st.session_state.current_story = {
                             "source": source_name,
                             "title": story.title,
-                            "summary": story.summary,
+                            "summary": story.get('summary', ''),
                             "link": story.link
                         }
                         st.session_state.view = "article"
@@ -308,6 +330,7 @@ elif page == "About Us":
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
 
 
 
