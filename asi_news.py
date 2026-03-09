@@ -115,13 +115,28 @@ if page == "Live News Feed":
         # --- CUSTOM NOISE FILTER ALGORITHM ---
         def is_relevant(title, summary):
             text = (title + " " + summary).lower()
-            # Banned keywords that indicate non-geopolitical/non-business news
+            
+            # 1. THE OVERRIDE: Events so major they bypass the filter (Policy/Security implications)
+            must_keep = ["school shooting", "mass shooting", "terrorism", "terrorist", "assassination"]
+            if any(word in text for word in must_keep):
+                return True
+
+            # 2. THE BLOCKLIST: Categories that indicate non-macro/non-geopolitical news
             banned_words = [
+                # Entertainment & Sports
                 "football", "soccer", "tennis", "basketball", "celebrity", "gossip", 
                 "hollywood", "movie", "actor", "actress", "singer", "pop star", 
                 "royal family", "premier league", "champions league", "oscars", 
-                "red carpet", "netflix", "kardashian", "grand slam"
+                
+                # Health / Lifestyle / Consumer Science
+                "weight-loss", "weight loss", "obesity", "study finds", "jab", "diet", 
+                "wellness", "tiktok trend", "viral", "skincare", "dating", "recipe",
+                
+                # Bizarre / Hyper-Local Crime / Everyday Accidents
+                "prank", "car crash", "robbery", "burglary", "stabbing", "florida man", 
+                "toilet paper", "bizarre", "manslaughter", "arrested for", "dui", "murder-suicide"
             ]
+            
             return not any(word in text for word in banned_words)
 
         # --- LOAD FEED ---
@@ -330,6 +345,7 @@ elif page == "About Us":
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
 
 
 
