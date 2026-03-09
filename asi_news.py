@@ -6,7 +6,7 @@ import json
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="ASI News | All Sides Included", 
-    page_icon="🦎", 
+    page_icon="📰", 
     layout="wide",
     initial_sidebar_state="expanded" 
 )
@@ -83,13 +83,13 @@ SOURCES = {
 # --- NAVIGATION ---
 st.sidebar.image("https://img.icons8.com/color/96/chameleon.png", width=60)
 st.sidebar.title("ASI News")
-page = st.sidebar.radio("Navigation", ["📰 Live News Feed", "🦎 About Us"], label_visibility="collapsed")
+page = st.sidebar.radio("Navigation", ["Live News Feed", "About Us"], label_visibility="collapsed")
 st.sidebar.markdown("---")
 
 # ==========================================
 # PAGE 1: LIVE NEWS FEED & ARTICLE VIEW
 # ==========================================
-if page == "📰 Live News Feed":
+if page == "Live News Feed":
     
     if st.session_state.view == "feed":
         head_col, btn_col = st.columns([4, 1])
@@ -229,7 +229,7 @@ if page == "📰 Live News Feed":
 # ==========================================
 # PAGE 2: ABOUT US
 # ==========================================
-elif page == "🦎 About Us":
+elif page == "About Us":
     st.session_state.view = "feed" 
     
     st.markdown("<div class='serif-title' style='font-size: 2.8rem;'>About ASI News</div>", unsafe_allow_html=True)
@@ -299,3 +299,4 @@ elif page == "🦎 About Us":
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
